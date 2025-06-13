@@ -1,0 +1,12 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="custScheduler" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="PreferredLanguage" Type="System.String" Scope="User">
+      <Value Profile="(Default)">English</Value>
+    </Setting>
+    <Setting Name="ConnectionString" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">Server=127.0.0.1;Database=client_schedule;Uid=sqlUser;Pwd=Passw0rd!;</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>
