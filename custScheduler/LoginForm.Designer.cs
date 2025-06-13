@@ -109,7 +109,7 @@
             Controls.Add(lblPassword);
             Controls.Add(lblUsername);
             Name = "LoginForm";
-            Text = "Form1";
+            Text = "AppointmentForm";
             Load += LoginForm_Load;
             ResumeLayout(false);
             PerformLayout();

@@ -1,4 +1,5 @@
-using Microsoft.Data.SqlClient;
+using MySql.Data.MySqlClient;
+using Swinford.Logging;
 
 namespace custScheduler
 {
@@ -18,14 +19,14 @@ namespace custScheduler
         public string lastUpdateBy = string.Empty;
 
 
-        public static explicit operator Customer(SqlDataReader reader)
+        public static explicit operator Customer(MySqlDataReader reader)
         {
             var customer = new Customer();
             if (reader.Read())
             {
                 customer.customerId = (int)reader["customerId"]; // customerId INT
                 customer.customerName = (string)reader["customerName"]; // customerName VARCHAR(50)
-                customer.active = (bool)reader["active"]; // active BOOLEAN
+                customer.active = Convert.ToBoolean(reader["active"]); // active BOOLEAN
                 customer.createDate = (DateTime)reader["createDate"]; // createDate DATETIME
                 customer.createdBy = (string)reader["createdBy"]; // createdBy VARCHAR(50)
                 customer.lastUpdate = (DateTime)reader["lastUpdate"]; // lastUpdate DATETIME
@@ -37,22 +38,25 @@ namespace custScheduler
 
         public Customer(int id = -1)
         {
+            Log.Debug("Looking up customer " + id);
             customerId = id;
             if (customerId == -1) return; // If the customerId is -1, do not load the customer
-            string _connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["MySQLConnection"].ConnectionString;
-            using (SqlConnection connection = new SqlConnection(_connectionString))
+            string _connectionString = Settings.Default.ConnectionString;
+            using (MySqlConnection connection = new MySqlConnection(_connectionString))
             {
+                Log.Debug("Opening connection");
                 connection.Open();
                 string query = "SELECT * FROM customer WHERE customerId = @id";
-                using (SqlCommand command = new SqlCommand(query, connection))
+                using (MySqlCommand command = new MySqlCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@id", customerId);
-                    using (SqlDataReader reader = command.ExecuteReader())
+                    using (MySqlDataReader reader = command.ExecuteReader())
                     {
+                        Log.Debug("Parsing Data");
                         if (reader.Read())
                         {
                             customerName = (string)reader["customerName"]; // customerName VARCHAR(50)
-                            active = (bool)reader["active"]; // active BOOLEAN
+                            active = Convert.ToBoolean(reader["active"]);
                             createDate = (DateTime)reader["createDate"]; // createDate DATETIME
                             createdBy = (string)reader["createdBy"]; // createdBy VARCHAR(50)
                             lastUpdate = (DateTime)reader["lastUpdate"]; // lastUpdate DATETIME
@@ -76,6 +80,42 @@ namespace custScheduler
         public void Delete()
         {
             throw new NotImplementedException("Delete method not implemented for Customer class.");
+        }
+
+
+        //Look up customer by their Name
+        public static Customer Lookup(string value)
+        {
+            Log.Debug("Looking up " + value, "customer.cs");
+            Customer output = new Customer();
+
+            string _connectionString = Settings.Default.ConnectionString;
+            using (MySqlConnection connection = new MySqlConnection(_connectionString))
+            {
+                Log.Debug("opening connection", "customer.cs");
+                connection.Open();
+                string query = "SELECT * FROM customer WHERE customerName = @name";
+                using (MySqlCommand command = new MySqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@name", value);
+                    using (MySqlDataReader reader = command.ExecuteReader())
+                    {
+                        Log.Debug("reading data", "customer.cs");
+                        if (reader.Read())
+                        {
+                            output.customerId = (int)reader["customerId"];
+                            output.customerName = (string)reader["customerName"]; // customerName VARCHAR(50)
+                            output.active = Convert.ToBoolean(reader["active"]);
+                            output.createDate = (DateTime)reader["createDate"]; // createDate DATETIME
+                            output.createdBy = (string)reader["createdBy"]; // createdBy VARCHAR(50)
+                            output.lastUpdate = (DateTime)reader["lastUpdate"]; // lastUpdate DATETIME
+                            output.lastUpdateBy = (string)reader["lastUpdateBy"]; // lastUpdateBy VARCHAR(50)
+                            output.Address = new Address((int)reader["addressId"]);
+                        }
+                    }
+                }
+            }
+            return output;
         }
 
         public bool IsValid =>

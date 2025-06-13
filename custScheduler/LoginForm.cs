@@ -1,11 +1,11 @@
-using Microsoft.Data.SqlClient;
-using System.Globalization;
 using System.Resources;
+using Swinford.Logging;
 
 namespace custScheduler
 {
     public partial class LoginForm : Form
     {
+        public event EventHandler LoginSuccess;
         private ResourceManager _rm = new ResourceManager(typeof(LoginForm));
         public LoginForm()
         {
@@ -27,17 +27,22 @@ namespace custScheduler
 
         private void btnLogin_Click(object sender, EventArgs e)
         {
+            Log.Info("Attempting sign-in as " + txtUsername.Text);
             try
             {
                 User user = new User(txtUsername.Text);
-                //TODO: Add Authentication Check
-                if (user.userId == -1)
+                if (user.userId == -1 || !user.Authenticated(txtPassword.Text))
                 {
+                    Log.Error("Failed signing attempt, Invalid Credentials");
                     MessageBox.Show(_rm.GetString("Message.InvalidCredentials"));
                     return;
                 }
+                Log.Info("Successful Signin");
+                Log.ToFile(LogLevel.Info, txtUsername.Text, "Login_History.txt");
+                Session.CurrentUser = user;
+                LoginSuccess?.Invoke(this, EventArgs.Empty);
             }
-            catch (SqlException ex) 
+            catch (Exception ex) 
             {
                 MessageBox.Show(_rm.GetString("Message.SQLError") + " : " + ex.Message);
             }

@@ -1,4 +1,4 @@
-using Microsoft.Data.SqlClient;
+using MySql.Data.MySqlClient;
 
 namespace custScheduler { 
     public class Country
@@ -11,7 +11,7 @@ namespace custScheduler {
         public string UpdatedBy = string.Empty; // lastUpdateBy VARCHAR(50)
 
 
-        public static explicit operator Country(SqlDataReader reader)
+        public static explicit operator Country(MySqlDataReader reader)
         {
             var country = new Country();
             if (reader.Read())
@@ -30,15 +30,15 @@ namespace custScheduler {
         {
             countryId = id;
             if (countryId == -1) return; // If the countryId is -1, do not load the country
-            string _connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["MySQLConnection"].ConnectionString;
-            using (SqlConnection connection = new SqlConnection(_connectionString))
+            string _connectionString = Settings.Default.ConnectionString;
+            using (MySqlConnection connection = new MySqlConnection(_connectionString))
             {
                 connection.Open();
                 string query = "SELECT * FROM country WHERE countryId = @id";
-                using (SqlCommand command = new SqlCommand(query, connection))
+                using (MySqlCommand command = new MySqlCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@id", countryId);
-                    using (SqlDataReader reader = command.ExecuteReader())
+                    using (MySqlDataReader reader = command.ExecuteReader())
                     {
                         if (reader.Read())
                         {

@@ -1,4 +1,4 @@
-using Microsoft.Data.SqlClient;
+using MySql.Data.MySqlClient;
 
 namespace custScheduler
 {
@@ -17,7 +17,7 @@ namespace custScheduler
         public DateTime UpdatedAt = DateTime.Now; // lastUpdate DATETIME
         public string UpdatedBy = string.Empty; // lastUpdateBy VARCHAR(50)
 
-        public static explicit operator City(SqlDataReader reader)
+        public static explicit operator City(MySqlDataReader reader)
         {
             var city = new City();
             if (reader.Read())
@@ -37,15 +37,15 @@ namespace custScheduler
         {
             cityId = id;
             if (cityId == -1) return; // If the cityId is -1, do not load the city
-            string _connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["MySQLConnection"].ConnectionString;
-            using (SqlConnection connection = new SqlConnection(_connectionString))
+            string _connectionString = Settings.Default.ConnectionString;
+            using (MySqlConnection connection = new MySqlConnection(_connectionString))
             {
                 connection.Open();
                 string query = "SELECT * FROM city WHERE cityId = @id";
-                using (SqlCommand command = new SqlCommand(query, connection))
+                using (MySqlCommand command = new MySqlCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@id", cityId);
-                    using (SqlDataReader reader = command.ExecuteReader())
+                    using (MySqlDataReader reader = command.ExecuteReader())
                     {
                         if (reader.Read())
                         {

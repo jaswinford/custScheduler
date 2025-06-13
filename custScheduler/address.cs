@@ -1,4 +1,4 @@
-using Microsoft.Data.SqlClient;
+using MySql.Data.MySqlClient;
 using System.Text.RegularExpressions;
 
 namespace custScheduler
@@ -21,7 +21,8 @@ namespace custScheduler
         public string LastUpdateBy = string.Empty; // lastUpdateBy VARCHAR(50)
 
 
-        public static explicit operator Address(SqlDataReader reader)
+        // Implemented to allow Implicit Casting. No longer used.
+        public static explicit operator Address(MySqlDataReader reader)
         {
             var address = new Address();
             if (reader.Read())
@@ -40,19 +41,20 @@ namespace custScheduler
             return address;
         }
 
+        // Create Address by DB ID.
         public Address(int id = -1)
         {
             AddressId = id;
             if (AddressId == -1) return; // If the AddressId is -1, do not load the address
-            string _connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["MySQLConnection"].ConnectionString;
-            using (SqlConnection connection = new SqlConnection(_connectionString))
+            string _connectionString = Settings.Default.ConnectionString;
+            using (MySqlConnection connection = new MySqlConnection(_connectionString))
             {
                 connection.Open();
                 string query = "SELECT * FROM address WHERE addressId = @id";
-                using (SqlCommand command = new SqlCommand(query, connection))
+                using (MySqlCommand command = new MySqlCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@id", AddressId);
-                    using (SqlDataReader reader = command.ExecuteReader())
+                    using (MySqlDataReader reader = command.ExecuteReader())
                     {
                         if (reader.Read())
                         {
@@ -98,6 +100,7 @@ namespace custScheduler
             throw new NotImplementedException(); //Delete method not implemented for Address class
         }
 
+        //Pretty-print the address
         public override string ToString()
         {
             string output = "";
