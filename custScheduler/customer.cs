@@ -19,6 +19,10 @@ namespace custScheduler
         public string lastUpdateBy = string.Empty;
 
 
+        public Customer()
+        {
+            Address = new Address();
+        }
         public static explicit operator Customer(MySqlDataReader reader)
         {
             var customer = new Customer();
@@ -67,19 +71,105 @@ namespace custScheduler
                 }
             }
         }
-        public void Create()
+        private void Create()
         {
-            throw new NotImplementedException("Create method not implemented for Customer class.");
+            Log.Debug("Creating new record", "customer.cs");
+            string query = "INSERT INTO customer " +Environment.NewLine + 
+                "(customerName, addressId, active, createDate, createdBy, lastUpdate, lastUpdateBy) " +Environment.NewLine +
+                "VALUES ( @customerName, @addressId, @active, @createDate, @createdBy, @lastUpdate, @lastUpdateBy);";
+            string connectionString = Settings.Default.ConnectionString;
+
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(connectionString))
+                {
+                    conn.Open();
+                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@customerName", customerName);
+                        cmd.Parameters.AddWithValue("@addressid", Address.AddressId);
+                        cmd.Parameters.AddWithValue("@active", active);
+                        cmd.Parameters.AddWithValue("@createDate", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                        cmd.Parameters.AddWithValue("@createdBy", Session.CurrentUser.Name);
+                        cmd.Parameters.AddWithValue("@lastUpdate", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                        cmd.Parameters.AddWithValue("@lastUpdateBy", Session.CurrentUser.Name);
+
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                string message = "Failed to create record. : " + ex.Message;
+                Log.Error(message , "customer.cs");
+                throw new Exception(message);
+            }
         }
 
-        public void Update()
+        private void Update()
         {
-            throw new NotImplementedException("Update method not implemented for Customer class.");
+            string query = "UPDATE customer" + Environment.NewLine + 
+                "SET customerName = @customerName, addressId = @addressId, active = @active, lastUpdate = @lastUpdate, lastUpdateBy = @lastUpdateBy " + Environment.NewLine +
+                "WHERE customerId = @customerId";
+            string connectionString = Settings.Default.ConnectionString;
+
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(connectionString))
+                {
+                    conn.Open();
+                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@customerName", customerName);
+                        cmd.Parameters.AddWithValue("@addressId", Address.AddressId);
+                        cmd.Parameters.AddWithValue("@active", active);
+                        cmd.Parameters.AddWithValue("@lastUpdate", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                        cmd.Parameters.AddWithValue("@lastUpdateBy", Session.CurrentUser.Name);
+                        cmd.Parameters.AddWithValue("@customerId", customerId);
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                string message = "Failed to update " + customerId + ": " + ex.Message;
+                Log.Error(message, "customer.cs");
+                throw new Exception(message);
+            }
+        }
+
+        public void Save()
+        {
+
+            // Perform validity check, then either Create or Update depending on if we have an ID or not.
+            if (!IsValid) { throw new Exception("Customer is not valid"); }
+            if (customerId == -1) { Create(); }
+            else { Update(); }
         }
 
         public void Delete()
         {
-            throw new NotImplementedException("Delete method not implemented for Customer class.");
+            string connectionString = Settings.Default.ConnectionString;
+            string query = "DELETE FROM customer WHERE appointmentId = @id";
+
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(connectionString)){
+                    conn.Open();
+                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@id", customerId);
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                string message = "Failed to delete record :" + ex;
+                Log.Error(message, "customer.cs");
+                throw new Exception(message);
+            }
         }
 
 

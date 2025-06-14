@@ -93,15 +93,15 @@ namespace Swinford.Logging
     public static class Log
     {
         public static void Debug(string message, [CallerMemberName] string scope = null)
-            => Logger.Instance.Log(LogLevel.Debug, "[DEBUG] " + message, scope);
+            => Logger.Instance.Log(LogLevel.Debug, message, scope);
         public static void Info(string message, [CallerMemberName] string scope = null)
-            => Logger.Instance.Log(LogLevel.Info, "[INFO] " + message, scope);
+            => Logger.Instance.Log(LogLevel.Info, message, scope);
         public static void Warning(string message, [CallerMemberName] string scope = null)
-            => Logger.Instance.Log(LogLevel.Warning, "[WARNING] " + message, scope);
+            => Logger.Instance.Log(LogLevel.Warning, message, scope);
         public static void Error(string message, [CallerMemberName] string scope = null)
-            => Logger.Instance.Log(LogLevel.Error, "[ERROR] " + message, scope);
+            => Logger.Instance.Log(LogLevel.Error, message, scope);
         public static void Fatal(string message, [CallerMemberName] string scope = null)
-            => Logger.Instance.Log(LogLevel.Fatal, "[Fatal] " + message, scope);
+            => Logger.Instance.Log(LogLevel.Fatal, message, scope);
         public static void ToFile(LogLevel level, string message, string filePath, [CallerMemberName] string scope = null)
             => Logger.Instance.LogToFile(level, message, filePath, scope);
     }

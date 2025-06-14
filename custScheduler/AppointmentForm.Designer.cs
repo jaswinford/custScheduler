@@ -29,7 +29,7 @@ namespace custScheduler
         /// </summary>
         private void InitializeComponent()
         {
-            monthCalendar = new MonthCalendar();
+            components = new System.ComponentModel.Container();
             tableLayoutPanel2 = new TableLayoutPanel();
             tableLayoutPanel1 = new TableLayoutPanel();
             label1 = new Label();
@@ -54,6 +54,12 @@ namespace custScheduler
             typeTextBox = new TextBox();
             txtURL = new TextBox();
             appointmentGrid = new DataGridView();
+            panel1 = new Panel();
+            label12 = new Label();
+            txtClock = new TextBox();
+            label11 = new Label();
+            cmbTimezone = new ComboBox();
+            monthCalendar = new MonthCalendar();
             menuStrip1 = new MenuStrip();
             newToolStripMenuItem = new ToolStripMenuItem();
             refreshToolStripMenuItem = new ToolStripMenuItem();
@@ -61,19 +67,17 @@ namespace custScheduler
             saveToolStripMenuItem = new ToolStripMenuItem();
             viewToolStripMenuItem = new ToolStripMenuItem();
             customersToolStripMenuItem = new ToolStripMenuItem();
-            addressesToolStripMenuItem = new ToolStripMenuItem();
+            reportsToolStripMenuItem = new ToolStripMenuItem();
+            typesByMonthToolStripMenuItem = new ToolStripMenuItem();
+            scheduleByUserToolStripMenuItem = new ToolStripMenuItem();
+            additionalToolStripMenuItem = new ToolStripMenuItem();
+            timerClock = new System.Windows.Forms.Timer(components);
             tableLayoutPanel2.SuspendLayout();
             tableLayoutPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)appointmentGrid).BeginInit();
+            panel1.SuspendLayout();
             menuStrip1.SuspendLayout();
             SuspendLayout();
-            // 
-            // monthCalendar
-            // 
-            monthCalendar.Location = new Point(9, 9);
-            monthCalendar.Name = "monthCalendar";
-            monthCalendar.TabIndex = 1;
-            monthCalendar.DateChanged += monthCalendar_DateChanged;
             // 
             // tableLayoutPanel2
             // 
@@ -81,9 +85,9 @@ namespace custScheduler
             tableLayoutPanel2.ColumnCount = 2;
             tableLayoutPanel2.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 250F));
             tableLayoutPanel2.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
-            tableLayoutPanel2.Controls.Add(monthCalendar, 0, 0);
             tableLayoutPanel2.Controls.Add(tableLayoutPanel1, 1, 0);
             tableLayoutPanel2.Controls.Add(appointmentGrid, 0, 1);
+            tableLayoutPanel2.Controls.Add(panel1, 0, 0);
             tableLayoutPanel2.Dock = DockStyle.Fill;
             tableLayoutPanel2.Location = new Point(0, 24);
             tableLayoutPanel2.Name = "tableLayoutPanel2";
@@ -92,6 +96,7 @@ namespace custScheduler
             tableLayoutPanel2.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
             tableLayoutPanel2.Size = new Size(1264, 737);
             tableLayoutPanel2.TabIndex = 7;
+            tableLayoutPanel2.Paint += tableLayoutPanel2_Paint;
             // 
             // tableLayoutPanel1
             // 
@@ -174,6 +179,7 @@ namespace custScheduler
             customerComboBox.Name = "customerComboBox";
             customerComboBox.Size = new Size(432, 23);
             customerComboBox.TabIndex = 3;
+            customerComboBox.SelectedIndexChanged += customerComboBox_SelectedIndexChanged;
             // 
             // label3
             // 
@@ -358,9 +364,63 @@ namespace custScheduler
             appointmentGrid.TabIndex = 3;
             appointmentGrid.Click += appointmentGrid_Changed;
             // 
+            // panel1
+            // 
+            panel1.Controls.Add(label12);
+            panel1.Controls.Add(txtClock);
+            panel1.Controls.Add(label11);
+            panel1.Controls.Add(cmbTimezone);
+            panel1.Controls.Add(monthCalendar);
+            panel1.Dock = DockStyle.Fill;
+            panel1.Location = new Point(3, 3);
+            panel1.Name = "panel1";
+            panel1.Size = new Size(244, 244);
+            panel1.TabIndex = 4;
+            // 
+            // label12
+            // 
+            label12.AutoSize = true;
+            label12.Location = new Point(9, 220);
+            label12.Name = "label12";
+            label12.Size = new Size(88, 15);
+            label12.TabIndex = 6;
+            label12.Text = "Corrected Time";
+            // 
+            // txtClock
+            // 
+            txtClock.Location = new Point(103, 214);
+            txtClock.Name = "txtClock";
+            txtClock.ReadOnly = true;
+            txtClock.Size = new Size(132, 23);
+            txtClock.TabIndex = 5;
+            // 
+            // label11
+            // 
+            label11.AutoSize = true;
+            label11.Location = new Point(8, 189);
+            label11.Name = "label11";
+            label11.Size = new Size(60, 15);
+            label11.TabIndex = 4;
+            label11.Text = "TimeZone";
+            // 
+            // cmbTimezone
+            // 
+            cmbTimezone.FormattingEnabled = true;
+            cmbTimezone.Location = new Point(74, 183);
+            cmbTimezone.Name = "cmbTimezone";
+            cmbTimezone.Size = new Size(161, 23);
+            cmbTimezone.TabIndex = 3;
+            cmbTimezone.SelectedIndexChanged += cmbTimezone_SelectedIndexChanged;
+            // 
+            // monthCalendar
+            // 
+            monthCalendar.Location = new Point(8, 9);
+            monthCalendar.Name = "monthCalendar";
+            monthCalendar.TabIndex = 2;
+            // 
             // menuStrip1
             // 
-            menuStrip1.Items.AddRange(new ToolStripItem[] { newToolStripMenuItem, refreshToolStripMenuItem, deleteToolStripMenuItem, saveToolStripMenuItem, viewToolStripMenuItem });
+            menuStrip1.Items.AddRange(new ToolStripItem[] { newToolStripMenuItem, refreshToolStripMenuItem, deleteToolStripMenuItem, saveToolStripMenuItem, viewToolStripMenuItem, reportsToolStripMenuItem });
             menuStrip1.Location = new Point(0, 0);
             menuStrip1.Name = "menuStrip1";
             menuStrip1.Size = new Size(1264, 24);
@@ -397,7 +457,7 @@ namespace custScheduler
             // 
             // viewToolStripMenuItem
             // 
-            viewToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { customersToolStripMenuItem, addressesToolStripMenuItem });
+            viewToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { customersToolStripMenuItem });
             viewToolStripMenuItem.Name = "viewToolStripMenuItem";
             viewToolStripMenuItem.Size = new Size(44, 20);
             viewToolStripMenuItem.Text = "View";
@@ -405,14 +465,43 @@ namespace custScheduler
             // customersToolStripMenuItem
             // 
             customersToolStripMenuItem.Name = "customersToolStripMenuItem";
-            customersToolStripMenuItem.Size = new Size(180, 22);
+            customersToolStripMenuItem.Size = new Size(131, 22);
             customersToolStripMenuItem.Text = "Customers";
+            customersToolStripMenuItem.Click += customersToolStripMenuItem_Click;
             // 
-            // addressesToolStripMenuItem
+            // reportsToolStripMenuItem
             // 
-            addressesToolStripMenuItem.Name = "addressesToolStripMenuItem";
-            addressesToolStripMenuItem.Size = new Size(180, 22);
-            addressesToolStripMenuItem.Text = "Addresses";
+            reportsToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { typesByMonthToolStripMenuItem, scheduleByUserToolStripMenuItem, additionalToolStripMenuItem });
+            reportsToolStripMenuItem.Name = "reportsToolStripMenuItem";
+            reportsToolStripMenuItem.Size = new Size(59, 20);
+            reportsToolStripMenuItem.Text = "Reports";
+            // 
+            // typesByMonthToolStripMenuItem
+            // 
+            typesByMonthToolStripMenuItem.Name = "typesByMonthToolStripMenuItem";
+            typesByMonthToolStripMenuItem.Size = new Size(180, 22);
+            typesByMonthToolStripMenuItem.Text = "Types By Month";
+            typesByMonthToolStripMenuItem.Click += typesByMonthToolStripMenuItem_Click;
+            // 
+            // scheduleByUserToolStripMenuItem
+            // 
+            scheduleByUserToolStripMenuItem.Name = "scheduleByUserToolStripMenuItem";
+            scheduleByUserToolStripMenuItem.Size = new Size(180, 22);
+            scheduleByUserToolStripMenuItem.Text = "Schedule by User";
+            scheduleByUserToolStripMenuItem.Click += scheduleByUserToolStripMenuItem_Click;
+            // 
+            // additionalToolStripMenuItem
+            // 
+            additionalToolStripMenuItem.Name = "additionalToolStripMenuItem";
+            additionalToolStripMenuItem.Size = new Size(180, 22);
+            additionalToolStripMenuItem.Text = "Additional";
+            additionalToolStripMenuItem.Click += additionalToolStripMenuItem_Click;
+            // 
+            // timerClock
+            // 
+            timerClock.Enabled = true;
+            timerClock.Interval = 500;
+            timerClock.Tick += timerClock_Tick;
             // 
             // AppointmentForm
             // 
@@ -429,15 +518,15 @@ namespace custScheduler
             tableLayoutPanel1.ResumeLayout(false);
             tableLayoutPanel1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)appointmentGrid).EndInit();
+            panel1.ResumeLayout(false);
+            panel1.PerformLayout();
             menuStrip1.ResumeLayout(false);
             menuStrip1.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
         }
 
-
         #endregion
-        private MonthCalendar monthCalendar;
         private TableLayoutPanel tableLayoutPanel2;
         private TableLayoutPanel tableLayoutPanel1;
         private Label label1;
@@ -468,7 +557,17 @@ namespace custScheduler
         private ToolStripMenuItem saveToolStripMenuItem;
         private ToolStripMenuItem viewToolStripMenuItem;
         private ToolStripMenuItem customersToolStripMenuItem;
-        private ToolStripMenuItem addressesToolStripMenuItem;
         private TextBox txtURL;
+        private Panel panel1;
+        private Label label12;
+        private TextBox txtClock;
+        private Label label11;
+        private ComboBox cmbTimezone;
+        private MonthCalendar monthCalendar;
+        private System.Windows.Forms.Timer timerClock;
+        private ToolStripMenuItem reportsToolStripMenuItem;
+        private ToolStripMenuItem typesByMonthToolStripMenuItem;
+        private ToolStripMenuItem scheduleByUserToolStripMenuItem;
+        private ToolStripMenuItem additionalToolStripMenuItem;
     }
 }

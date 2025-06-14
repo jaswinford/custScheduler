@@ -68,6 +68,7 @@
             txtPassword.Name = "txtPassword";
             txtPassword.Size = new Size(166, 23);
             txtPassword.TabIndex = 3;
+            txtPassword.KeyDown += txtPassword_KeyDown;
             // 
             // btnLogin
             // 
@@ -78,6 +79,7 @@
             btnLogin.Text = "btnLogin";
             btnLogin.UseVisualStyleBackColor = true;
             btnLogin.Click += btnLogin_Click;
+            // 
             // btnCancel
             // 
             btnCancel.Location = new Point(12, 79);
@@ -86,6 +88,7 @@
             btnCancel.TabIndex = 5;
             btnCancel.Text = "btnCancel";
             btnCancel.UseVisualStyleBackColor = true;
+            btnCancel.Click += btnCancel_Click;
             // 
             // lblStatus
             // 

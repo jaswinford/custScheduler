@@ -1,4 +1,5 @@
 using MySql.Data.MySqlClient;
+using Org.BouncyCastle.Crypto;
 using System.Text.RegularExpressions;
 
 namespace custScheduler
@@ -87,6 +88,7 @@ namespace custScheduler
 
         // Functions
 
+        // Only read functions are implemented in this example.
         public void Create()
         {
             throw new NotImplementedException(); //Create method not implemented for Address class
@@ -104,12 +106,51 @@ namespace custScheduler
         public override string ToString()
         {
             string output = "";
-            if (Address1 != string.Empty) output += Address1 + "\n";
-            if (Address2 != string.Empty) output += Address2 + "\n";
+            if (Address1 != string.Empty) output += Address1 + Environment.NewLine;
+            if (Address2 != string.Empty) output += Address2 + Environment.NewLine;
             if (City.Name != string.Empty) output += City.Name + ", ";
-            if (PostalCode != string.Empty) output += PostalCode + "\n";
+            if (PostalCode != string.Empty) output += PostalCode + Environment.NewLine;
             if (Phone != string.Empty) output += Phone;
             return output;
+        }
+
+        internal static Address Lookup(string text)
+        {
+            // Split the address by linebreaks
+            var addressLines = text.Split(new string[] { System.Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+            string address = addressLines[0].Trim();
+            string address2 = addressLines[1].Trim();
+
+            // City and Postcode are on the same line, need to split them again.
+            var cityCode = addressLines[2].Split(",");
+            // var city = cityCode[0]; we don't really need the city, and this saves another lookup
+            var postalCode = cityCode[1];
+
+
+            // Now we're ready to lookup the address in the DB.
+
+            string query = "SELECT addressId FROM address WHERE address = @address AND address2 = @address2 AND postalCode = @postalCode";
+            string connectionString = Settings.Default.ConnectionString;
+
+            using (MySqlConnection conn = new MySqlConnection(connectionString))
+            {
+                conn.Open();
+                using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@address", address);
+                    cmd.Parameters.AddWithValue("@address2", address2);
+                    cmd.Parameters.AddWithValue("@postalCode", postalCode);
+                    using (MySqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            Address output = new Address((int)reader["addressId"]);
+                            return output;
+                        }
+                        return null;
+                    }
+                }
+            }
         }
     }
 }

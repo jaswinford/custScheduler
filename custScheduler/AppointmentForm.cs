@@ -27,8 +27,17 @@ namespace custScheduler
         // On load, Bind the DataGrid to the above query then alert on upcoming appointments
         private void Form1_Load(object sender, EventArgs e)
         {
+            var timeZones = TimeZoneInfo.GetSystemTimeZones();
+
+            cmbTimezone.DataSource = timeZones.ToList();
+            cmbTimezone.DisplayMember = "DisplayName";
+            cmbTimezone.ValueMember = "Id";
+            cmbTimezone.SelectedValue = TimeZoneInfo.Local.Id;
+
             BindAppointments(appointmentGrid);
             AlertUpcomingAppointments();
+            PopulateCustomers();
+            RefreshValues();
         }
 
 
@@ -46,8 +55,8 @@ namespace custScheduler
                 using (MySqlCommand cmd = new MySqlCommand(query, conn))
                 {
                     cmd.Parameters.AddWithValue("@id", Session.CurrentUser.userId);
-                    cmd.Parameters.AddWithValue("@now", DateTime.Now);
-                    cmd.Parameters.AddWithValue("@future", DateTime.Now.AddMinutes(15));
+                    cmd.Parameters.AddWithValue("@now", DateTime.Now.ToUniversalTime());
+                    cmd.Parameters.AddWithValue("@future", DateTime.Now.ToUniversalTime().AddMinutes(15));
                     using (MySqlDataReader reader = cmd.ExecuteReader())
                     {
                         Log.Debug("Reading Data");
@@ -63,13 +72,18 @@ namespace custScheduler
         // Form refresh function
         private void RefreshValues()
         {
+            var selectedTimeZoneInfo = (TimeZoneInfo)cmbTimezone.SelectedItem;
             PopulateCustomers();
             customerComboBox.SelectedItem = curAppointment.Customer.customerName;
             IDBox.Text = curAppointment.appointmentId.ToString();
             titleTextBox.Text = curAppointment.Title;
             descriptionTextBox.Text = curAppointment.Description;
-            startDTPick.Value = curAppointment.Start;
-            endDTPick.Value = curAppointment.End;
+            try
+            {
+                startDTPick.Value = TimeZoneInfo.ConvertTimeFromUtc(curAppointment.Start, selectedTimeZoneInfo);
+                endDTPick.Value = TimeZoneInfo.ConvertTimeFromUtc(curAppointment.End, selectedTimeZoneInfo);
+            }
+            catch (Exception ex) { Log.Error(ex.Message); }
             locationTextBox.Text = curAppointment.Location;
             contactTextBox.Text = curAppointment.Contact;
             txtURL.Text = curAppointment.Url;
@@ -102,7 +116,7 @@ namespace custScheduler
                 }
             }
         }
-        
+
         //Update DataGrid with all appointments
         public void BindAppointments(DataGridView dataGridView)
         {
@@ -123,7 +137,7 @@ namespace custScheduler
                 }
             }
         }
-        
+
         //Update DataGride with all appointments for a given day
         public void BindAppointments(DataGridView dataGridView, DateTime day)
         {
@@ -148,17 +162,19 @@ namespace custScheduler
                 }
             }
         }
-        
+
         //Clear form values and update grid.
         private void refreshToolStripMenuItem_Click(object sender, EventArgs e)
         {
             BindAppointments(appointmentGrid);
+            RefreshValues();
         }
 
         // Clear form and update grid with date.
         private void monthCalendar_DateChanged(object sender, EventArgs e)
         {
             BindAppointments(appointmentGrid, monthCalendar.SelectionStart);
+            RefreshValues();
         }
 
         // Clear form and prep for new appointment.
@@ -174,7 +190,7 @@ namespace custScheduler
             try
             {
                 //Set the current appointment to the one selected.
-                curAppointment = new Appointment((int)appointmentGrid.CurrentRow.Cells[0].Value); 
+                curAppointment = new Appointment((int)appointmentGrid.CurrentRow.Cells[0].Value);
             }
             catch (Exception ex)
             {
@@ -185,13 +201,15 @@ namespace custScheduler
                 RefreshValues();
             }
         }
-        
+
         // Save the form data as a new appointment
         private void saveToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            var selectedTimeZoneInfo = (TimeZoneInfo)cmbTimezone.SelectedItem;
+
             // Copy user entries into current appointment.
-            curAppointment.Start = startDTPick.Value;
-            curAppointment.End = endDTPick.Value;
+            curAppointment.Start = TimeZoneInfo.ConvertTimeToUtc(startDTPick.Value, selectedTimeZoneInfo);
+            curAppointment.End = TimeZoneInfo.ConvertTimeToUtc(endDTPick.Value, selectedTimeZoneInfo);
             curAppointment.Url = txtURL.Text;
             curAppointment.Title = titleTextBox.Text;
             curAppointment.Description = descriptionTextBox.Text;
@@ -225,7 +243,7 @@ namespace custScheduler
             if (result == DialogResult.No) { return; } //If the user says no, bail. 
             try
             {
-                Log.Info("Deleting appointment "+curAppointment.appointmentId);
+                Log.Info("Deleting appointment " + curAppointment.appointmentId);
                 curAppointment.Delete();
             }
             catch (Exception ex)
@@ -238,6 +256,65 @@ namespace custScheduler
                 RefreshValues();
                 BindAppointments(appointmentGrid);
             }
+        }
+
+        //Open the customer management Dialogue
+        private void customersToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CustomerForm customerForm = new CustomerForm();
+            customerForm.Show();
+        }
+
+        //Update customer info when selecting a new customer
+        private void customerComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            curAppointment.Customer = Customer.Lookup(customerComboBox.SelectedItem.ToString());
+        }
+
+        private void tableLayoutPanel2_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
+
+        //Update the localized clock for the selected timezone.
+        private void timerClock_Tick(object sender, EventArgs e)
+        {
+            try
+            {
+                var selectedTimeZoneInfo = (TimeZoneInfo)cmbTimezone.SelectedItem;
+
+                DateTime utcTime = DateTime.UtcNow;
+                DateTime localTime = TimeZoneInfo.ConvertTimeFromUtc(utcTime, selectedTimeZoneInfo);
+
+                txtClock.Text = localTime.ToString("yyyy-MM-dd HH:mm:ss");
+            }
+            catch (Exception ex)
+            {
+                Log.Error("Failed to update clock : " + ex, "Clock");
+            }
+        }
+
+        private void cmbTimezone_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            RefreshValues();
+        }
+
+        private void typesByMonthToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Report report = new Report(0);
+            report.Show();
+        }
+
+        private void scheduleByUserToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Report report = new Report(1);
+            report.Show();
+        }
+
+        private void additionalToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Report report = new Report(2);
+            report.Show();
         }
     }
 }

@@ -1,4 +1,5 @@
 using MySql.Data.MySqlClient;
+using Org.BouncyCastle.Bcpg;
 using Swinford.Logging;
 
 namespace custScheduler
@@ -27,7 +28,7 @@ namespace custScheduler
         // Pretty Print the update/creating times.
         public string Details { get
             {
-                return "Created By " + CreatedBy + " on " + CreatedAt.ToString() + "\nLast Update on " + UpdatedAt.ToString() + " by " + UpdatedBy;
+                return "Created By " + CreatedBy + " on " + CreatedAt.ToString() + Environment.NewLine + "Last Update on " + UpdatedAt.ToString() + " by " + UpdatedBy;
             } }
 
         // No longer used. Allows for implicit casting of Appointments. 
@@ -90,6 +91,12 @@ namespace custScheduler
                             CreatedBy = (string)reader["createdBy"]; // createdBy VARCHAR(50)
                             UpdatedAt = (DateTime)reader["lastUpdate"]; // lastUpdate DATETIME
                             UpdatedBy = (string)reader["lastUpdateBy"]; // lastUpdateBy VARCHAR(50)
+
+                            //Set DateTimeKinds to UTC
+                            Start = DateTime.SpecifyKind(Start, DateTimeKind.Utc);
+                            End = DateTime.SpecifyKind(End, DateTimeKind.Utc);
+                            CreatedAt = DateTime.SpecifyKind(CreatedAt, DateTimeKind.Utc);
+                            UpdatedAt = DateTime.SpecifyKind(UpdatedAt, DateTimeKind.Utc);
                         }
                     }
                 }
@@ -108,6 +115,38 @@ namespace custScheduler
             End.Hour > 9 && End.Hour < 17 &&
             Start.TimeOfDay < End.TimeOfDay;
 
+        public bool HasConflicts { get
+            {
+                string query = "SELECT appointmentId " + Environment.NewLine +
+                    "FROM appointment " + Environment.NewLine +
+                    "WHERE userId = @userId " + Environment.NewLine +
+                    "AND (start BETWEEN @start AND @end OR end BETWEEN @start AND @end)";
+                string connectionString = Settings.Default.ConnectionString;
+
+                try
+                {
+                    using (MySqlConnection con = new MySqlConnection(connectionString))
+                    {
+                        con.Open();
+                        using (MySqlCommand cmd = new MySqlCommand(query, con))
+                        {
+                            cmd.Parameters.AddWithValue("@userId", User.userId);
+                            cmd.Parameters.AddWithValue("@start", Start.ToString("yyyy-MM-dd HH:mm:ss"));
+                            cmd.Parameters.AddWithValue("@end", End.ToString("yyyy-MM-dd HH:mm:ss"));
+
+                            using (MySqlDataReader reader = cmd.ExecuteReader())
+                            {
+                                return reader.HasRows;
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex.Message, "appointment.cs");
+                    throw ex;
+                }
+            } }
         // Create new records. This can only be called internally and relies on the calling function to perform validity checks
         private void Create()
         {
@@ -128,7 +167,7 @@ namespace custScheduler
                 using (MySqlCommand cmd = new MySqlCommand(query, conn))
                 {
                     cmd.Parameters.AddWithValue("@customerid", Customer.customerId);
-                    cmd.Parameters.AddWithValue("@userId", User.userId);
+                    cmd.Parameters.AddWithValue("@userId", Session.CurrentUser.userId);
                     cmd.Parameters.AddWithValue("@title", Title);
                     cmd.Parameters.AddWithValue("@description", Description);
                     cmd.Parameters.AddWithValue("@location", Location);
@@ -213,6 +252,9 @@ namespace custScheduler
                 throw new Exception(message); 
             }
 
+            // Before save, check for conflicts.
+            if (HasConflicts) { throw new Exception("Appointment conflicts with existing event"); }
+
             // If we don't have an ID, create a new appointment. Otherwise, try to update the current appointment.
             if (appointmentId == -1) { Create(); }
             else { Update(); }
@@ -223,15 +265,25 @@ namespace custScheduler
         {
             string connectionString = Settings.Default.ConnectionString;
             string query = "DELETE FROM appointment WHERE appointmentId = @id";
-            using (MySqlConnection conn = new MySqlConnection(connectionString))
+            try
             {
-                conn.Open();
-                using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                using (MySqlConnection conn = new MySqlConnection(connectionString))
                 {
-                    cmd.Parameters.AddWithValue("@id", appointmentId);
-                    cmd.ExecuteNonQuery();
+                    conn.Open();
+                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@id", appointmentId);
+                        cmd.ExecuteNonQuery();
+                    }
                 }
+            } 
+            catch (Exception ex)
+            {
+                string message = "Failed to delete record :" + ex;
+                Log.Error(message, "appointment.cs");
+                throw new Exception(message);
             }
+
         }
     }
 }
