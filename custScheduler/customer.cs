@@ -151,7 +151,7 @@ namespace custScheduler
         public void Delete()
         {
             string connectionString = Settings.Default.ConnectionString;
-            string query = "DELETE FROM customer WHERE appointmentId = @id";
+            string query = "DELETE FROM customer WHERE customerId = @id";
 
             try
             {
