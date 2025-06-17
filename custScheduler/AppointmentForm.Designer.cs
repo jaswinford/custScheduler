@@ -363,6 +363,7 @@ namespace custScheduler
             appointmentGrid.Size = new Size(1258, 481);
             appointmentGrid.TabIndex = 3;
             appointmentGrid.Click += appointmentGrid_Changed;
+            appointmentGrid.KeyUp += appointmentGrid_KeyUp;
             // 
             // panel1
             // 
@@ -382,7 +383,7 @@ namespace custScheduler
             label12.AutoSize = true;
             label12.Location = new Point(9, 220);
             label12.Name = "label12";
-            label12.Size = new Size(88, 15);
+            label12.Size = new Size(86, 15);
             label12.TabIndex = 6;
             label12.Text = "Corrected Time";
             // 
@@ -399,7 +400,7 @@ namespace custScheduler
             label11.AutoSize = true;
             label11.Location = new Point(8, 189);
             label11.Name = "label11";
-            label11.Size = new Size(60, 15);
+            label11.Size = new Size(59, 15);
             label11.TabIndex = 4;
             label11.Text = "TimeZone";
             // 
@@ -465,7 +466,7 @@ namespace custScheduler
             // customersToolStripMenuItem
             // 
             customersToolStripMenuItem.Name = "customersToolStripMenuItem";
-            customersToolStripMenuItem.Size = new Size(131, 22);
+            customersToolStripMenuItem.Size = new Size(129, 22);
             customersToolStripMenuItem.Text = "Customers";
             customersToolStripMenuItem.Click += customersToolStripMenuItem_Click;
             // 
@@ -479,21 +480,21 @@ namespace custScheduler
             // typesByMonthToolStripMenuItem
             // 
             typesByMonthToolStripMenuItem.Name = "typesByMonthToolStripMenuItem";
-            typesByMonthToolStripMenuItem.Size = new Size(180, 22);
+            typesByMonthToolStripMenuItem.Size = new Size(164, 22);
             typesByMonthToolStripMenuItem.Text = "Types By Month";
             typesByMonthToolStripMenuItem.Click += typesByMonthToolStripMenuItem_Click;
             // 
             // scheduleByUserToolStripMenuItem
             // 
             scheduleByUserToolStripMenuItem.Name = "scheduleByUserToolStripMenuItem";
-            scheduleByUserToolStripMenuItem.Size = new Size(180, 22);
+            scheduleByUserToolStripMenuItem.Size = new Size(164, 22);
             scheduleByUserToolStripMenuItem.Text = "Schedule by User";
             scheduleByUserToolStripMenuItem.Click += scheduleByUserToolStripMenuItem_Click;
             // 
             // additionalToolStripMenuItem
             // 
             additionalToolStripMenuItem.Name = "additionalToolStripMenuItem";
-            additionalToolStripMenuItem.Size = new Size(180, 22);
+            additionalToolStripMenuItem.Size = new Size(164, 22);
             additionalToolStripMenuItem.Text = "Additional";
             additionalToolStripMenuItem.Click += additionalToolStripMenuItem_Click;
             // 

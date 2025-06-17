@@ -316,5 +316,10 @@ namespace custScheduler
             Report report = new Report(2);
             report.Show();
         }
+
+        private void appointmentGrid_KeyUp(object sender, KeyEventArgs e)
+        {
+            RefreshValues();
+        }
     }
 }
