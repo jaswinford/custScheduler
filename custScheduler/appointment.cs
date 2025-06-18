@@ -1,5 +1,4 @@
 using MySql.Data.MySqlClient;
-using Org.BouncyCastle.Bcpg;
 using Swinford.Logging;
 
 namespace custScheduler
