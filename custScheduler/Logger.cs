@@ -1,7 +1,4 @@
-﻿using Microsoft.Identity.Client;
-using System;
-using System.IO;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace Swinford.Logging

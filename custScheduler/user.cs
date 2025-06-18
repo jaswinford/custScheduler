@@ -1,4 +1,3 @@
-using System.Configuration;
 using MySql.Data.MySqlClient;
 using Swinford.Logging;
 
