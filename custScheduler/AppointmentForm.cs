@@ -310,8 +310,21 @@ namespace custScheduler
         }
 
         private void appointmentGrid_KeyUp(object sender, KeyEventArgs e)
-        {
-            RefreshValues();
+        {            
+            try
+            {
+                //Set the current appointment to the one selected.
+                curAppointment = new Appointment((int)appointmentGrid.CurrentRow.Cells[0].Value);
+            }
+            catch (Exception ex)
+            {
+                Log.Error("Failed to update DataGrid Selection. : " + ex.Message);
+            }
+            finally
+            {
+                RefreshValues();
+            }
+
         }
     }
 }

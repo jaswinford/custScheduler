@@ -149,6 +149,9 @@ namespace custScheduler
         // Create new records. This can only be called internally and relies on the calling function to perform validity checks
         private void Create()
         {
+            // Before save, check for conflicts.
+            if (HasConflicts) { throw new Exception("Appointment conflicts with existing event"); }
+
             Log.Debug("Attempting to create record", "appointment.cs");
             string connectionString = Settings.Default.ConnectionString;
             string query = "INSERT INTO appointment (customerId," +
@@ -200,9 +203,9 @@ namespace custScheduler
         private void Update()
         {
             string connectionString = Settings.Default.ConnectionString;
-            string query = "UPDATE appointment" +
-                "SET userId = @userId, title = @title, description = @description, location = @location, contact=@contact," +
-                " type = @type, url=@url, start=@start,end = @end, lastUpdate = @lastUpdate, lastUpdateBy = @lastUpdateBy " +
+            string query = "UPDATE appointment" + Environment.NewLine +
+                "SET userId = @userId, title = @title, description = @description, location = @location, contact=@contact," + Environment.NewLine +
+                " type = @type, url=@url, start=@start,end = @end, lastUpdate = @lastUpdate, lastUpdateBy = @lastUpdateBy " + Environment.NewLine +
                 "WHERE appointmentId = @id";
             using (MySqlConnection conn = new MySqlConnection(connectionString))
             {
@@ -251,8 +254,6 @@ namespace custScheduler
                 throw new Exception(message); 
             }
 
-            // Before save, check for conflicts.
-            if (HasConflicts) { throw new Exception("Appointment conflicts with existing event"); }
 
             // If we don't have an ID, create a new appointment. Otherwise, try to update the current appointment.
             if (appointmentId == -1) { Create(); }
