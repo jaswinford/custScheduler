@@ -178,14 +178,9 @@ namespace custScheduler
 
         private void cmbAddress_SelectedIndexChanged(object sender, EventArgs e)
         {
-            try
-            {
+            if (cmbAddress.SelectedValue != null && cmbAddress.SelectedValue is not DataRowView) {
                 curCustomer.Address = new Address((int)cmbAddress.SelectedValue);
                 PopulateAddressFields();
-            }
-            catch (Exception ex)
-            {
-                Log.Error("Failed to update address box :" + ex.Message);
             }
         }
 
