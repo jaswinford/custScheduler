@@ -22,7 +22,7 @@ namespace custScheduler
             this.Text = _rm.GetString("Login");
 
             // Clear status update.
-            lblStatus.Text = string.Empty;
+            lblStatus.Text = _rm.GetString("Language");
         }
 
         private void btnLogin_Click(object sender, EventArgs e)
