@@ -383,7 +383,7 @@ namespace custScheduler
             label12.AutoSize = true;
             label12.Location = new Point(9, 220);
             label12.Name = "label12";
-            label12.Size = new Size(86, 15);
+            label12.Size = new Size(88, 15);
             label12.TabIndex = 6;
             label12.Text = "Corrected Time";
             // 
@@ -400,7 +400,7 @@ namespace custScheduler
             label11.AutoSize = true;
             label11.Location = new Point(8, 189);
             label11.Name = "label11";
-            label11.Size = new Size(59, 15);
+            label11.Size = new Size(60, 15);
             label11.TabIndex = 4;
             label11.Text = "TimeZone";
             // 
@@ -418,6 +418,7 @@ namespace custScheduler
             monthCalendar.Location = new Point(8, 9);
             monthCalendar.Name = "monthCalendar";
             monthCalendar.TabIndex = 2;
+            monthCalendar.DateChanged += monthCalendar_DateChanged;
             // 
             // menuStrip1
             // 
@@ -466,7 +467,7 @@ namespace custScheduler
             // customersToolStripMenuItem
             // 
             customersToolStripMenuItem.Name = "customersToolStripMenuItem";
-            customersToolStripMenuItem.Size = new Size(129, 22);
+            customersToolStripMenuItem.Size = new Size(131, 22);
             customersToolStripMenuItem.Text = "Customers";
             customersToolStripMenuItem.Click += customersToolStripMenuItem_Click;
             // 

@@ -110,8 +110,8 @@ namespace custScheduler
             Start.DayOfWeek != DayOfWeek.Sunday &&
             End.DayOfWeek != DayOfWeek.Saturday &&
             End.DayOfWeek != DayOfWeek.Sunday &&
-            Start.Hour > 9 && Start.Hour < 17 &&
-            End.Hour > 9 && End.Hour < 17 &&
+            Start.Hour > 13 && Start.Hour < 21 &&
+            End.Hour > 13 && End.Hour < 21 &&
             Start.TimeOfDay < End.TimeOfDay;
 
         public bool HasConflicts { get
@@ -146,6 +146,8 @@ namespace custScheduler
                     throw ex;
                 }
             } }
+
+
         // Create new records. This can only be called internally and relies on the calling function to perform validity checks
         private void Create()
         {
@@ -179,9 +181,9 @@ namespace custScheduler
                     cmd.Parameters.AddWithValue("@start", Start.ToString("yyyy-MM-dd HH:mm:ss"));
                     cmd.Parameters.AddWithValue("@end", End.ToString("yyyy-MM-dd HH:mm:ss"));
                     cmd.Parameters.AddWithValue("@createDate", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
-                    cmd.Parameters.AddWithValue("@createBy", User.Name);
+                    cmd.Parameters.AddWithValue("@createBy", Session.CurrentUser.Name);
                     cmd.Parameters.AddWithValue("@lastUpdate", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
-                    cmd.Parameters.AddWithValue("@lastUpdateBy", User.Name);
+                    cmd.Parameters.AddWithValue("@lastUpdateBy", Session.CurrentUser.Name);
 
                     Log.Debug("Writing Data");
 
@@ -225,8 +227,14 @@ namespace custScheduler
                     cmd.Parameters.AddWithValue("@lastUpdate", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
                     cmd.Parameters.AddWithValue("@lastUpdateBy", User.Name);
                     cmd.Parameters.AddWithValue("@id", appointmentId);
-                    cmd.ExecuteNonQuery();
-
+                    try
+                    {
+                        cmd.ExecuteNonQuery();
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new Exception(ex.ToString());
+                    }
                 }
             }
  

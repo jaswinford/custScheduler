@@ -7,7 +7,7 @@ namespace custScheduler
     public partial class AppointmentForm : Form
     {
         //Query for populating the Datagrid
-        private readonly string query = "SELECT appointmentId,title,location,contact,type,start,end,description FROM appointment";
+        private readonly string query = "SELECT appointmentId,title,location,contact,type,description FROM appointment";
 
         // Store the currently viewed/manipulated appointment locally
         private Appointment curAppointment = new Appointment();
@@ -310,7 +310,7 @@ namespace custScheduler
         }
 
         private void appointmentGrid_KeyUp(object sender, KeyEventArgs e)
-        {            
+        {
             try
             {
                 //Set the current appointment to the one selected.
@@ -326,5 +326,6 @@ namespace custScheduler
             }
 
         }
+
     }
 }

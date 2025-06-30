@@ -1,4 +1,5 @@
 using MySql.Data.MySqlClient;
+using Swinford.Logging;
 
 namespace custScheduler
 {
@@ -60,15 +61,104 @@ namespace custScheduler
                 }
             }
         }
-
-        public void Create()
+        public City(string cityName)
         {
-            throw new NotImplementedException();
+            string _connectionString = Settings.Default.ConnectionString;
+            using (MySqlConnection connection = new MySqlConnection(_connectionString))
+            {
+                connection.Open();
+                string query = "SELECT * FROM city WHERE city = @cityName";
+                using (MySqlCommand command = new MySqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@id", cityId);
+                    using (MySqlDataReader reader = command.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            cityId = (int)reader["cityId"];
+                            Name = (string)reader["city"]; // city VARCHAR(50)
+                            Country = new Country((int)reader["countryId"]); // countryId INT
+                            CreatedAt = (DateTime)reader["createDate"]; // createDate DATETIME
+                            CreatedBy = (string)reader["createdBy"]; // createdBy VARCHAR(50)
+                            UpdatedAt = (DateTime)reader["lastUpdate"]; // lastUpdate DATETIME
+                            UpdatedBy = (string)reader["lastUpdateBy"]; // lastUpdateBy VARCHAR(50)
+                        }
+                    }
+                }
+            }
         }
 
-        public void Update()
+        private void Create()
         {
-           throw new NotImplementedException();
+            string connectionString = Settings.Default.ConnectionString;
+            string query = "INSERT INTO city (city, countryId, createDate, createdBy, lastUpdate, lastUpdateBy)" +
+                "VALUES (@city, @countryId, @createDate, @createdBy, @lastUpdate, @lastUpdateBy);";
+
+            using (MySqlConnection conn = new MySqlConnection(connectionString))
+            {
+                conn.Open();
+                using (MySqlCommand command = new MySqlCommand(query, conn))
+                {
+                    command.Parameters.AddWithValue("@city", Name);
+                    command.Parameters.AddWithValue("@countryId", Country.countryId);
+                    command.Parameters.AddWithValue("@createDate", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                    command.Parameters.AddWithValue("@lastUpdate", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                    command.Parameters.AddWithValue("@createdBy", Session.CurrentUser.Name);
+                    command.Parameters.AddWithValue("@lastUpdateBy", Session.CurrentUser.Name);
+
+                    try
+                    {
+                        command.ExecuteNonQuery();
+                    }
+                    catch (Exception ex)
+                    {
+                        string message = "Failed to create city : " + ex.Message;
+                        Log.Error(message);
+                        throw new Exception(message);
+                    }
+                }
+            }
+        }
+
+        private void Update()
+        {
+            string connectionString = Settings.Default.ConnectionString;
+            string query = "UPDATE city SET city = @city, countryId = @countryId, lastUpdate = @lastUpdate, lastUpdateBy = @lastUpdateBy";
+
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                connection.Open();
+                using (MySqlCommand cmd = new MySqlCommand(query, connection))
+                {
+                    cmd.Parameters.AddWithValue("@city", Name);
+                    cmd.Parameters.AddWithValue("@countryId", Country.countryId);
+                    cmd.Parameters.AddWithValue("@lastUpdate", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                    cmd.Parameters.AddWithValue("@lastUpdateBy", Session.CurrentUser.Name);
+
+                    try
+                    {
+                        cmd.ExecuteNonQuery();
+                    }
+                    catch (Exception ex)
+                    {
+                        string message = "Failed to update city :" + ex.Message;
+                        Log.Error(message);
+                        throw new Exception(message);
+                    }
+                }
+            }
+        }
+
+        public void Save()
+        {
+            if (cityId != -1)
+            {
+                Update();
+            }
+            else
+            {
+                Create();
+            }
         }
 
         public void Delete()

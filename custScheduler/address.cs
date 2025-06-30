@@ -1,5 +1,6 @@
 using MySql.Data.MySqlClient;
 using System.Text.RegularExpressions;
+using Swinford.Logging;
 
 namespace custScheduler
 {
@@ -80,7 +81,7 @@ namespace custScheduler
             {
                 if (Address1 == string.Empty || City.Name == string.Empty || PostalCode == string.Empty ||
                     Phone == string.Empty) return false; //verify address is provided
-                if (!Regex.IsMatch(Phone, @"^[0-9-]+$")) return false;
+                if (!Regex.IsMatch(Phone, @"^[0-9\-\(\)\ ]+$")) return false;
                 return true;
             }
         }
@@ -88,13 +89,88 @@ namespace custScheduler
         // Functions
 
         // Only read functions are implemented in this example.
-        public void Create()
+        private void Create()
         {
-            throw new NotImplementedException(); //Create method not implemented for Address class
+            string connectionString = Settings.Default.ConnectionString;
+            string query = "INSERT INTO address (address, address2, cityId, postalCode," +
+                "phone, createDate, createdBy, lastUpdate, lastUpdateBy) VALUES(" +
+                "@address, @address2, @cityId, @postalCode, @phone, @createDate, @createdBy, @lastUpdate, @lastUpdateBy);";
+            using (MySqlConnection conn = new MySqlConnection(connectionString))
+            {
+                conn.Open();
+                using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@address", Address1);
+                    cmd.Parameters.AddWithValue("@address2", Address2);
+                    cmd.Parameters.AddWithValue("@cityId", City.cityId);
+                    cmd.Parameters.AddWithValue("@postalCode", PostalCode);
+                    cmd.Parameters.AddWithValue("@phone", Phone);
+                    cmd.Parameters.AddWithValue("@createDate", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                    cmd.Parameters.AddWithValue("@createBy", Session.CurrentUser.Name);
+                    cmd.Parameters.AddWithValue("@lastUpdate", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                    cmd.Parameters.AddWithValue("@lastUpdateBy", Session.CurrentUser.Name);
+
+                    try
+                    {
+                        cmd.ExecuteNonQuery();
+                    }
+                    catch (Exception ex)
+                    {
+                        string message = ("Failed to create address : " + ex.Message);
+                        Log.Error(message);
+                        throw new Exception(message);
+                    }
+                }
+            }
+
         }
-        public void Update()
+        private void Update()
         {
-            throw new NotImplementedException(); //Update method not implemented for Address class
+            string connectionString = Settings.Default.ConnectionString;
+            string query = "UPDATE address" + Environment.NewLine +
+                "SET address = @address, address2 = @address2, cityId = @cityId, " + Environment.NewLine +
+                "postalCode = @postalCode, phone = @phone, lastUpdate = @lastUpdate, lastUpdateBy = @lastUpdateBy " + Environment.NewLine +
+                "WHERE addressId = @addressId";
+            using (MySqlConnection conn = new MySqlConnection(connectionString))
+            {
+                conn.Open();
+                using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@addressId", AddressId);
+                    cmd.Parameters.AddWithValue("@address", Address1);
+                    cmd.Parameters.AddWithValue("@address2", Address2);
+                    cmd.Parameters.AddWithValue("@cityId", City.cityId);
+                    cmd.Parameters.AddWithValue("@postalCode", PostalCode);
+                    cmd.Parameters.AddWithValue("@phone", Phone);
+                    cmd.Parameters.AddWithValue("@lastUpdate", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                    cmd.Parameters.AddWithValue("@lastUpdateBy", Session.CurrentUser.Name);
+
+                    try
+                    {
+                        cmd.ExecuteNonQuery();
+                    }
+                    catch (Exception ex)
+                    {
+                        string message = ("Failed to update address : " + ex.Message);
+                        Log.Error(message);
+                        throw new Exception(message);
+                    }
+                }
+            }
+        }
+
+        public void Save()
+        {
+            if (!IsValid) { throw new Exception("Address not valid"); }
+            City.Save();
+            if (AddressId == -1)
+            { 
+                Create();
+            }
+            else
+            {
+                Update();
+            }
         }
         public void Delete()
         {
@@ -105,11 +181,10 @@ namespace custScheduler
         public override string ToString()
         {
             string output = "";
-            if (Address1 != string.Empty) output += Address1 + Environment.NewLine;
-            if (Address2 != string.Empty) output += Address2 + Environment.NewLine;
-            if (City.Name != string.Empty) output += City.Name + ", ";
-            if (PostalCode != string.Empty) output += PostalCode + Environment.NewLine;
-            if (Phone != string.Empty) output += Phone;
+            output += Address1 + Environment.NewLine;
+            output += Address2 + Environment.NewLine;
+            output += City.Name + ", ";
+            output += PostalCode + Environment.NewLine;
             return output;
         }
 
