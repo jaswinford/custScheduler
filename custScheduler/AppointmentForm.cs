@@ -200,8 +200,8 @@ namespace custScheduler
             var selectedTimeZoneInfo = (TimeZoneInfo)cmbTimezone.SelectedItem;
 
             // Copy user entries into current appointment.
-            curAppointment.Start = TimeZoneInfo.ConvertTimeToUtc(startDTPick.Value, selectedTimeZoneInfo);
-            curAppointment.End = TimeZoneInfo.ConvertTimeToUtc(endDTPick.Value, selectedTimeZoneInfo);
+            curAppointment.Start = TimeZoneInfo.ConvertTime(startDTPick.Value, selectedTimeZoneInfo,TimeZoneInfo.Utc);
+            curAppointment.End = TimeZoneInfo.ConvertTime(endDTPick.Value, selectedTimeZoneInfo, TimeZoneInfo.Utc);
             curAppointment.Url = txtURL.Text;
             curAppointment.Title = titleTextBox.Text;
             curAppointment.Description = descriptionTextBox.Text;
