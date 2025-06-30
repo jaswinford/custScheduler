@@ -253,7 +253,7 @@ namespace custScheduler
 
         private void cmbCity_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (cmbCity.SelectedValue != null) 
+            if (cmbCity.SelectedValue != null && cmbCity.SelectedValue is not DataRowView) 
             { 
                 curCustomer.Address.City = new City((int)cmbCity.SelectedValue);
             }
