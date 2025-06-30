@@ -207,14 +207,14 @@ namespace custScheduler
             string connectionString = Settings.Default.ConnectionString;
             string query = "UPDATE appointment" + Environment.NewLine +
                 "SET userId = @userId, title = @title, description = @description, location = @location, contact=@contact," + Environment.NewLine +
-                " type = @type, url=@url, start=@start,end = @end, lastUpdate = @lastUpdate, lastUpdateBy = @lastUpdateBy " + Environment.NewLine +
+                " type = @type, url=@url, start=@start,end = @end, lastUpdate = @lastUpdate, lastUpdateBy = @lastUpdateBy,customerId = @customerId " + Environment.NewLine +
                 "WHERE appointmentId = @id";
             using (MySqlConnection conn = new MySqlConnection(connectionString))
             {
                 conn.Open();
                 using (MySqlCommand cmd = new MySqlCommand(query, conn))
                 {
-                    cmd.Parameters.AddWithValue("@customerid", Customer.customerId);
+                    cmd.Parameters.AddWithValue("@customerId", Customer.customerId);
                     cmd.Parameters.AddWithValue("@userId", User.userId);
                     cmd.Parameters.AddWithValue("@title", Title);
                     cmd.Parameters.AddWithValue("@description", Description);
