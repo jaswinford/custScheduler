@@ -51,7 +51,6 @@ namespace custScheduler
                 conn.Open();
                 using (MySqlDataAdapter da = new MySqlDataAdapter(query, conn))
                 {
-                    cmbAddress.Items.Clear();
                     DataTable dt = new DataTable();
                     da.Fill(dt);
                     cmbAddress.DataSource = dt;
