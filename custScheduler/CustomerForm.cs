@@ -253,11 +253,10 @@ namespace custScheduler
 
         private void cmbCity_SelectedIndexChanged(object sender, EventArgs e)
         {
-            try
-            {
+            if (cmbCity.SelectedValue != null) 
+            { 
                 curCustomer.Address.City = new City((int)cmbCity.SelectedValue);
             }
-            catch { }
         }
     }
 }
